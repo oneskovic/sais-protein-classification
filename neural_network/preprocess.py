@@ -10,6 +10,21 @@ def onehot_encode_aa(x, codes_dict):
         onehot_x[i][codes_dict[letter]] = 1
     return onehot_x
 
+def generate_ngrams(n, current_str, i, res):
+    if i == n:
+        res[''.join(x for x in current_str)] = len(res)
+        return
+    for c in ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']:
+        current_str[i] = c
+        generate_ngrams(n, current_str, i+1, res)
+
+def ngram_encode_aa(x, ngram_map):
+    x = x.upper()
+    ngram_x = np.zeros(len(ngram_map))
+    for i in range(len(x)-2):
+        ngram_x[ngram_map[x[i:i+3]]] = 1
+    return ngram_x
+
 def onehot_encode_labels(labels, label_dict):
     onehot_labels = np.zeros((len(labels), len(label_dict)))
     for i, label in enumerate(labels):
@@ -38,14 +53,18 @@ def preprocess(data):
     
     distinct_aas = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
     codes_dict = make_dict(distinct_aas)
-    onehot_seqs = zero_padd([onehot_encode_aa(seq, codes_dict) for seq in aa_seqs], max_len)
-    onehot_seqs = onehot_seqs.reshape(onehot_seqs.shape[0],onehot_seqs.shape[1]*onehot_seqs.shape[2])
+    # encoded_seqs = zero_padd([onehot_encode_aa(seq, codes_dict) for seq in aa_seqs], max_len)
+    # encoded_seqs = encoded_seqs.reshape(encoded_seqs.shape[0],encoded_seqs.shape[1]*encoded_seqs.shape[2])
     
+    ngram_map = dict()
+    generate_ngrams(3, [None]*3, 0, ngram_map)
+    encoded_seqs = np.array([ngram_encode_aa(seq, ngram_map) for seq in aa_seqs])
+
     if 'prot_Pfam' in data.columns:        
         labels = data['prot_Pfam']
         # distinct_labels = labels.unique()
         # label_dict = make_dict(distinct_labels)
         encoded_labels = np.array([label_dict[label] for label in labels])
-        return onehot_seqs, encoded_labels
+        return encoded_seqs, encoded_labels
     else:
-        return onehot_seqs
+        return encoded_seqs

@@ -1,14 +1,12 @@
 from copyreg import pickle
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from torch import nn
 import torch
 from torchmetrics import Accuracy
 from preprocess import preprocess
 import optuna
 from sklearn.model_selection import train_test_split
-import progressbar
 
 data_path = '/home/ognjen/dev/sais-protein-classification/data/Klasifikacija-proteina.csv'
 

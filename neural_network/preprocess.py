@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+label_dict = {'PF17482': 0, 'PF02665': 1, 'PF01888': 2, 'PF04749': 3, 'PF00639': 4, 'PF07819': 5, 'PF13618': 6, 'PF01395': 7, 'PF00890': 8, 'PF09721': 9, 'PF04279': 10}
+
 def onehot_encode_aa(x, codes_dict):
     x = x.upper()
     onehot_x = np.zeros((len(x), len(codes_dict)))
@@ -33,14 +35,17 @@ def make_dict(values):
 def preprocess(data):
     aa_seqs = data['AA_sequence']
     max_len = max([len(x) for x in aa_seqs])
-    labels = data['prot_Pfam']
     
     distinct_aas = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
     codes_dict = make_dict(distinct_aas)
     onehot_seqs = zero_padd([onehot_encode_aa(seq, codes_dict) for seq in aa_seqs], max_len)
     onehot_seqs = onehot_seqs.reshape(onehot_seqs.shape[0],onehot_seqs.shape[1]*onehot_seqs.shape[2])
-    distinct_labels = labels.unique()
-    label_dict = make_dict(distinct_labels)
-    encoded_labels = np.array([label_dict[label] for label in labels])
-
-    return onehot_seqs, encoded_labels
+    
+    if 'prot_Pfam' in data.columns:        
+        labels = data['prot_Pfam']
+        # distinct_labels = labels.unique()
+        # label_dict = make_dict(distinct_labels)
+        encoded_labels = np.array([label_dict[label] for label in labels])
+        return onehot_seqs, encoded_labels
+    else:
+        return onehot_seqs

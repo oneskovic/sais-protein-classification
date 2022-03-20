@@ -156,3 +156,6 @@ data/
 
 # CSV files
 **.csv
+
+# Optuna study dump
+study.pkl

@@ -34,6 +34,7 @@ def create_model(hparams, input_shape):
 
 def train_model(model, x_train, x_test, y_train, y_test, hparams, trial = None, should_print = False):
     learning_rate = hparams['learning_rate']
+    epoch_cnt = 50
     # Define loss function
     criterion = nn.CrossEntropyLoss()
     metric = Accuracy()
@@ -41,7 +42,7 @@ def train_model(model, x_train, x_test, y_train, y_test, hparams, trial = None, 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     # Train model
-    for epoch in range(30):
+    for epoch in range(epoch_cnt):
         # Forward pass
         outputs = model(x_train)
         loss = criterion(outputs, y_train)
@@ -66,7 +67,7 @@ def train_model(model, x_train, x_test, y_train, y_test, hparams, trial = None, 
                     raise optuna.TrialPruned()
         
         if should_print:
-            percent_done = epoch / 30.0 * 100
+            percent_done = epoch / epoch_cnt * 100
             print(f'{percent_done:.2f}% Train accuracy: {train_acc:.2f} Test accuracy: {optimize_acc:.2f}       ', end='\r')
     return optimize_acc
 
@@ -79,13 +80,13 @@ def validate(hparams, model):
     x_train, x_rem, y_train, y_rem = train_test_split(x, y, test_size=0.2, random_state=42)
     x_opt, x_val, y_opt, y_val = train_test_split(x_rem, y_rem, test_size=0.5, random_state=42)
     # Convert to torch tensors
-    x_train = torch.from_numpy(x_train).float()
-    x_val = torch.from_numpy(x_val).float()
-    x_opt = torch.from_numpy(x_opt).float()
+    x_train = torch.tensor(x_train, dtype=torch.float32)
+    x_val = torch.tensor(x_val, dtype=torch.float32)
+    x_opt = torch.tensor(x_opt, dtype=torch.float32)
 
-    y_train = torch.from_numpy(y_train).long()
-    y_val = torch.from_numpy(y_val).long()
-    y_opt = torch.from_numpy(y_opt).long()
+    y_train = torch.tensor(y_train, dtype=torch.long)
+    y_val = torch.tensor(y_val, dtype=torch.long)
+    y_opt = torch.tensor(y_opt, dtype=torch.long)
 
     train_model(model, x_train, x_val, y_train, y_val, hparams, should_print=True)
     return eval_model(x_val, y_val, model)
@@ -105,13 +106,13 @@ def objective(trial):
     x_train, x_rem, y_train, y_rem = train_test_split(x, y, test_size=0.2, random_state=42)
     x_opt, x_val, y_opt, y_val = train_test_split(x_rem, y_rem, test_size=0.5, random_state=42)
     # Convert to torch tensors
-    x_train = torch.from_numpy(x_train).float()
-    x_val = torch.from_numpy(x_val).float()
-    x_opt = torch.from_numpy(x_opt).float()
+    x_train = torch.tensor(x_train, dtype=torch.float32)
+    x_val = torch.tensor(x_val, dtype=torch.float32)
+    x_opt = torch.tensor(x_opt, dtype=torch.float32)
 
-    y_train = torch.from_numpy(y_train).long()
-    y_val = torch.from_numpy(y_val).long()
-    y_opt = torch.from_numpy(y_opt).long()
+    y_train = torch.tensor(y_train, dtype=torch.long)
+    y_val = torch.tensor(y_val, dtype=torch.long)
+    y_opt = torch.tensor(y_opt, dtype=torch.long)
 
     hparams = {'neuron_cnt1': neuron_cnt1, 'neuron_cnt2': neuron_cnt2, 'learning_rate': learning_rate}
     model = create_model(hparams, x.shape[1])
@@ -121,7 +122,7 @@ def objective(trial):
 data = pd.read_csv(data_path)    
 x, y = preprocess(data)
 study = optuna.create_study(pruner=optuna.pruners.HyperbandPruner(), direction='maximize')
-study.optimize(objective, n_trials=3)
+study.optimize(objective, n_trials=10)
 
 model = create_model(study.best_params, x.shape[1])
 val_loss, val_acc = validate(study.best_params, model)

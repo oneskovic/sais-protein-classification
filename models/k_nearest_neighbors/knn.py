@@ -9,12 +9,12 @@ Model = namedtuple('Model', ['k', 'train_accuracy', 'test_accuracy', 'bin'])
 
 def __prepare_data(data):
     preprocessed = preprocess(data)
-    inputs = np.array(preprocessed[0], dtype=bool)
-    if (len(preprocessed) > 1):
-        labels = preprocessed[1]
+    if isinstance(preprocessed, tuple):
+        inputs, labels = preprocessed
+        inputs = np.array(inputs, dtype=bool)
         return inputs, labels
     else:
-        return inputs
+        return np.array(preprocessed, dtype=bool)
 
 def get_best(data, metric, max_k=6):
     inputs, labels = __prepare_data(data)
@@ -47,10 +47,10 @@ def generate_predictions(data, model, write_dir):
     predictions_file = open(write_dir, "w")
     predictions_file.write("prot_ID,AA_sequence,prot_Pfam\n") # CSV header
     for ind, row in data.iterrows():
-        prediction = model.predict(inputs[ind])
+        prediction = model.predict(inputs[ind].reshape(1, -1))
         prot_id = row["prot_ID"]
         seq = row["AA_sequence"]
-        prot_pfam = inv_label_dict[prediction]
+        prot_pfam = inv_label_dict[prediction[0]]
         print(f"Protein ID: {prot_id} (Sequence {seq[:7]}...)  ==>  Predicted family: {prot_pfam}")
         predictions_file.write(f"{prot_id},{seq},{prot_pfam}\n")
     predictions_file.close()

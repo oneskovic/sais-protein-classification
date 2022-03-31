@@ -165,3 +165,6 @@ temp/
 
 # Pickle
 *.pkl
+
+# Main script
+__main__.py

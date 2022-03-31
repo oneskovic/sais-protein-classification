@@ -159,3 +159,9 @@ data/
 
 # Temp files
 temp/
+
+# Vscode
+.vscode/
+
+# Pickle
+*.pkl

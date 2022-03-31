@@ -163,3 +163,5 @@ temp/
 # Main script
 __main__.py
 .vscode/launch.json
+protein_classification/lstm/trained_models/0.pkl
+protein_classification/lstm/trained_models/0.pkl

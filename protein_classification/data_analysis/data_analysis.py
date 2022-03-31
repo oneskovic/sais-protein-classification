@@ -11,19 +11,20 @@ def count_aa_occurance(data):
                 letter_cnts[letter] += 1
     return letter_cnts
 
-data = pd.read_csv('data/klasifikacija-proteina-small.csv')
+def show_graphs():
+    data = pd.read_csv('data/klasifikacija-proteina-small.csv')
 
-lengths = np.array([len(x) for x in data['AA_sequence']])
-plt.title('Raspodela duzina sekvenci amino kiselina')
-plt.hist(lengths, bins=50)
-plt.show()
-longest_seq = max(lengths)
-print('Najduza sekvenca: ', longest_seq)
+    lengths = np.array([len(x) for x in data['AA_sequence']])
+    plt.title('Raspodela duzina sekvenci amino kiselina')
+    plt.hist(lengths, bins=50)
+    plt.show()
+    longest_seq = max(lengths)
+    print('Najduza sekvenca: ', longest_seq)
 
-letter_cnts = count_aa_occurance(data)
-plt.title('Raspodela broja pojavljivanja svake aminokiseline')
-plt.bar(letter_cnts.keys(), letter_cnts.values())
-plt.show()
+    letter_cnts = count_aa_occurance(data)
+    plt.title('Raspodela broja pojavljivanja svake aminokiseline')
+    plt.bar(letter_cnts.keys(), letter_cnts.values())
+    plt.show()
 
-categories = data['prot_Pfam'].unique()
-print('Broj razlicitih kategorija: ', len(categories))
+    categories = data['prot_Pfam'].unique()
+    print('Broj razlicitih kategorija: ', len(categories))

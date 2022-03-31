@@ -10,7 +10,7 @@ import optuna
 from sklearn.model_selection import train_test_split
 import pickle
 
-data_path = 'data/klasifikacija-proteina.csv'
+data_path = 'data/klasifikacija-proteina-small.csv'
 class_cnt = 11
 
 class LSTMPredictor(nn.Module):
@@ -74,7 +74,7 @@ def train_model(model, x_train, x_test, y_train, y_test, hparams, trial = None, 
     
     # Train model
     for epoch in range(epoch_cnt):
-        model_file = open(f'models/lstm/trained_models/{trial._trial_id}.pkl', 'wb+')
+        model_file = open(f'protein_classification/lstm/trained_models/{trial._trial_id}.pkl', 'wb+')
         pickle.dump(model, model_file)
         model_file.close()
 
@@ -153,4 +153,4 @@ data = pd.read_csv(data_path)
 study = optuna.create_study(pruner=optuna.pruners.HyperbandPruner(), direction='maximize')
 study.optimize(objective, n_trials=5)
 
-pickle.dump(study, open('models/lstm/study.pkl', 'wb+'))
+pickle.dump(study, open('protein_classification/lstm/study.pkl', 'wb+'))

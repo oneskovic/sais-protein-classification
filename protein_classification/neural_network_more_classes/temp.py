@@ -50,7 +50,7 @@ data = pd.read_csv(data_path)
 data['prot_Pfam'][data['prot_Pfam'] == 'None'] = None
 data = data.dropna()
 x,y = preprocess(data)
-best_model = pickle.load(open(r'models\neural_network_more_classes\best_model.pkl', 'rb'))
+best_model = pickle.load(open(r'protein_classification\neural_network_more_classes\best_model.pkl', 'rb'))
 
 
 m1,m2,m3,f = eval_on_train_set(model=best_model)

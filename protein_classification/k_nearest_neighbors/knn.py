@@ -1,6 +1,6 @@
 import pickle
 from sklearn.neighbors import KNeighborsClassifier
-from models.utils.preprocess import preprocess
+from protein_classification.utils.preprocess import preprocess
 from sklearn.model_selection import train_test_split
 from collections import namedtuple
 import numpy as np
@@ -16,7 +16,7 @@ def __prepare_data(data):
     else:
         return np.array(preprocessed, dtype=bool)
 
-def get_best(data, metric, max_k=6):
+def get_best(data, metric, max_k=6, save_best=False):
     inputs, labels = __prepare_data(data)
     X_train, X_test, y_train, y_test = train_test_split(inputs, labels, test_size = 0.2, random_state = 69)
     
@@ -37,12 +37,13 @@ def get_best(data, metric, max_k=6):
         print("====================")
     
     # Save best model
-    pickle.dump(best_model.bin, open(r'/home/ognjen/dev/sais-protein-classification/models/best_model_knn.pkl', 'wb'))
+    if save_best:
+        pickle.dump(best_model.bin, open(r'/home/ognjen/dev/sais-protein-classification/models/best_model_knn.pkl', 'wb'))
     return best_model
 
 
 def generate_predictions(data, model, write_dir):
-    from models.utils.preprocess import inv_label_dict
+    from protein_classification.utils.preprocess import inv_label_dict
     inputs = __prepare_data(data)
     predictions_file = open(write_dir, "w")
     predictions_file.write("prot_ID,AA_sequence,prot_Pfam\n") # CSV header

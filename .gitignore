@@ -159,6 +159,7 @@ data/
 
 # Temp files
 temp/
+<<<<<<< Updated upstream
 
 # Vscode
 .vscode/
@@ -168,3 +169,7 @@ temp/
 
 # Main script
 __main__.py
+=======
+.vscode/launch.json
+>>>>>>> Stashed changes
+protein_classification/lstm/trained_models/0.pkl

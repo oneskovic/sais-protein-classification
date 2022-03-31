@@ -151,16 +151,9 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# Datasets
-data/
-
-# CSV files
-**.csv
 
 # Temp files
 temp/
-<<<<<<< Updated upstream
-
 # Vscode
 .vscode/
 
@@ -169,7 +162,4 @@ temp/
 
 # Main script
 __main__.py
-=======
 .vscode/launch.json
->>>>>>> Stashed changes
-protein_classification/lstm/trained_models/0.pkl

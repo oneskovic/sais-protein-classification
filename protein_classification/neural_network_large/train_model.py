@@ -4,11 +4,11 @@ import numpy as np
 from torch import nn
 import torch
 from torchmetrics import Accuracy, F1Score, CohenKappa
-from preprocess import preprocess
+from utils.preprocess import preprocess_encode_ngram
 import optuna
 from sklearn.model_selection import train_test_split
 
-data_path = 'data/klasifikacija-proteina-novo.csv'
+data_path = 'data/klasifikacija-proteina-large.csv'
 class_cnt = 200
 
 def eval_model(x, y, model):
@@ -120,18 +120,13 @@ def objective(trial):
     # Load data
     data = pd.read_csv(data_path)
     # Preprocess data
-    x, y = preprocess(data)
+    x, y = preprocess_encode_ngram(data)
+    x = torch.tensor(x, dtype=torch.float32)
+    y = torch.tensor(y, dtype=torch.long)
     # Split data
     x_train, x_rem, y_train, y_rem = train_test_split(x, y, test_size=0.2, random_state=42)
     x_val, x_opt, y_val, y_opt = train_test_split(x_rem, y_rem, test_size=0.5, random_state=42)
     # Convert to torch tensors
-    x_train = torch.tensor(x_train, dtype=torch.float32)
-    x_opt = torch.tensor(x_opt, dtype=torch.float32)
-    x_val = torch.tensor(x_val, dtype=torch.float32)
-
-    y_train = torch.tensor(y_train, dtype=torch.long)
-    y_opt = torch.tensor(y_opt, dtype=torch.long)
-    y_val = torch.tensor(y_val, dtype=torch.long)
 
     hparams = {'neuron_cnt1': neuron_cnt1, 'neuron_cnt2': neuron_cnt2, 'learning_rate': learning_rate}
     model = create_model(hparams, x.shape[1])
@@ -139,8 +134,6 @@ def objective(trial):
     return optimze_acc
 
 def main():
-    data = pd.read_csv(data_path)    
-    x, y = preprocess(data)
     study = optuna.create_study(pruner=optuna.pruners.HyperbandPruner(), direction='maximize')
     study.optimize(objective, n_trials=50)
 

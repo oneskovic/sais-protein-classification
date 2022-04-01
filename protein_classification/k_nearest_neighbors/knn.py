@@ -1,6 +1,6 @@
 import pickle
 from sklearn.neighbors import KNeighborsClassifier
-from protein_classification.utils.preprocess import preprocess
+from protein_classification.utils.preprocess import preprocess_encode_ngram
 from sklearn.model_selection import train_test_split
 from collections import namedtuple
 import numpy as np
@@ -8,7 +8,7 @@ import numpy as np
 Model = namedtuple('Model', ['k', 'train_accuracy', 'test_accuracy', 'bin'])
 
 def __prepare_data(data):
-    preprocessed = preprocess(data)
+    preprocessed = preprocess_encode_ngram(data)
     if isinstance(preprocessed, tuple):
         inputs, labels = preprocessed
         inputs = np.array(inputs, dtype=bool)

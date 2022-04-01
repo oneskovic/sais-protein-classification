@@ -4,11 +4,11 @@ import numpy as np
 from torch import nn
 import torch
 from torchmetrics import Accuracy
-from protein_classification.utils.preprocess import preprocess
+from protein_classification.utils.preprocess import preprocess_encode_ngram
 import optuna
 from sklearn.model_selection import train_test_split
 
-data_path = 'data/Klasifikacija-proteina.csv'
+data_path = 'data/klasifikacija-proteina-small.csv'
 
 def eval_model(x, y, model):
     # Define loss fn and metric
@@ -75,7 +75,7 @@ def validate(hparams, model):
     # Load data
     data = pd.read_csv(data_path)
     # Preprocess data
-    x, y = preprocess(data)
+    x, y = preprocess_encode_ngram(data)
     # Split data
     x_train, x_rem, y_train, y_rem = train_test_split(x, y, test_size=0.2, random_state=42)
     x_opt, x_val, y_opt, y_val = train_test_split(x_rem, y_rem, test_size=0.5, random_state=42)
@@ -101,7 +101,7 @@ def objective(trial):
     # Load data
     data = pd.read_csv(data_path)
     # Preprocess data
-    x, y = preprocess(data)
+    x, y = preprocess_encode_ngram(data)
     # Split data
     x_train, x_rem, y_train, y_rem = train_test_split(x, y, test_size=0.2, random_state=42)
     x_opt, x_val, y_opt, y_val = train_test_split(x_rem, y_rem, test_size=0.5, random_state=42)
@@ -120,7 +120,7 @@ def objective(trial):
     return optimze_acc
 
 data = pd.read_csv(data_path)    
-x, y = preprocess(data)
+x, y = preprocess_encode_ngram(data)
 study = optuna.create_study(pruner=optuna.pruners.HyperbandPruner(), direction='maximize')
 study.optimize(objective, n_trials=10)
 

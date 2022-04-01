@@ -52,7 +52,7 @@ def make_dict(values):
         d[value] = i
     return d
 
-def preprocess(data):
+def preprocess_encode_ngram(data, ngram_len = 3):
     aa_seqs = data['AA_sequence']
     max_len = max([len(x) for x in aa_seqs])
     
@@ -61,8 +61,8 @@ def preprocess(data):
     # encoded_seqs = zero_padd([onehot_encode_aa(seq, codes_dict) for seq in aa_seqs], max_len)
     # encoded_seqs = encoded_seqs.reshape(encoded_seqs.shape[0],encoded_seqs.shape[1]*encoded_seqs.shape[2])
     
-    ngram_map = generate_ngrams(3)
-    encoded_seqs = np.array([ngram_encode_aa(seq, ngram_map) for seq in aa_seqs])
+    ngram_map = generate_ngrams(ngram_len)
+    encoded_seqs = np.array([ngram_encode_aa(seq, ngram_len, ngram_map) for seq in aa_seqs])
 
     if 'prot_Pfam' in data.columns:        
         labels = data['prot_Pfam']

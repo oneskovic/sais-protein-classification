@@ -138,15 +138,16 @@ def objective(trial):
     optimze_acc = train_model(model, x_train, x_opt, y_train, y_opt, hparams, trial, True)
     return optimze_acc
 
-data = pd.read_csv(data_path)    
-x, y = preprocess(data)
-study = optuna.create_study(pruner=optuna.pruners.HyperbandPruner(), direction='maximize')
-study.optimize(objective, n_trials=50)
+def main():
+    data = pd.read_csv(data_path)    
+    x, y = preprocess(data)
+    study = optuna.create_study(pruner=optuna.pruners.HyperbandPruner(), direction='maximize')
+    study.optimize(objective, n_trials=50)
 
-model = create_model(study.best_params, x.shape[1])
-val_loss, val_acc = validate(study.best_params, model)
-print('Validation loss: ', val_loss)
-print('Validation accuracy: ', val_acc)
+    model = create_model(study.best_params, x.shape[1])
+    val_loss, val_acc = validate(study.best_params, model)
+    print('Validation loss: ', val_loss)
+    print('Validation accuracy: ', val_acc)
 
-pickle.dump(model, open('best_model.pkl', 'wb+'))
-pickle.dump(study, open('study.pkl', 'wb+'))
+    pickle.dump(model, open('best_model.pkl', 'wb+'))
+    pickle.dump(study, open('study.pkl', 'wb+'))

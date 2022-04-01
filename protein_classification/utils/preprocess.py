@@ -56,7 +56,7 @@ def make_dict(values):
     return d
 
 def preprocess_encode_ngram(data, ngram_len = 3):
-    aa_seqs = data['AA_sequence']
+    aa_seqs = data['AA_sequence'][:10000]
     max_len = max([len(x) for x in aa_seqs])
     
     distinct_aas = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']

@@ -3,9 +3,9 @@ import pandas as pd
 import numpy as np
 from torch import nn
 import torch
-from torchmetrics import Accuracy, F1Score, CohenKappa
-from preprocess import preprocess
 import torch.nn.functional as F
+from torchmetrics import Accuracy, F1Score, CohenKappa
+from protein_classification.utils.preprocess import preprocess_encode_onehot
 import optuna
 from sklearn.model_selection import train_test_split
 import pickle
@@ -14,7 +14,6 @@ data_path = 'data/klasifikacija-proteina-small.csv'
 class_cnt = 11
 
 class LSTMPredictor(nn.Module):
-
     def __init__(self, embedding_dim, hidden_dim, tagset_size):
         super(LSTMPredictor, self).__init__()
         self.hidden_dim = hidden_dim
@@ -34,7 +33,6 @@ class LSTMPredictor(nn.Module):
             preds[i] = tag_space[i, lengths[i]-1, :]
         tag_scores = F.log_softmax(preds, dim=0)
         return tag_scores
-
 
 def eval_metrics(y_pred, y_true, should_print = False):
     metric_acc = Accuracy()
@@ -62,6 +60,7 @@ def get_packed_sequence(batch):
         lengths.append(length)
         i += 1
     return torch.nn.utils.rnn.pack_padded_sequence(inputs, lengths, batch_first=True, enforce_sorted=False)
+
 def train_model(model, x_train, x_test, y_train, y_test, hparams, trial = None, should_print = False):
     learning_rate = hparams['learning_rate']
     epoch_cnt = 20
@@ -74,9 +73,9 @@ def train_model(model, x_train, x_test, y_train, y_test, hparams, trial = None, 
     
     # Train model
     for epoch in range(epoch_cnt):
-        model_file = open(f'protein_classification/lstm/trained_models/{trial._trial_id}.pkl', 'wb+')
-        pickle.dump(model, model_file)
-        model_file.close()
+        # model_file = open(f'protein_classification/lstm/trained_models/{trial._trial_id}.pkl', 'wb+')
+        # pickle.dump(model, model_file)
+        # model_file.close()
 
         # perm = torch.randperm(x_train.shape[0])
         # x_train = x_train[perm]
@@ -131,26 +130,19 @@ def objective(trial):
     # Load data
     data = pd.read_csv(data_path)
     # Preprocess data
-    x, y = preprocess(data)
+    x, y = preprocess_encode_onehot(data, include_len=True, return_as_tensors=True)
     # Split data
     x_train, x_rem, y_train, y_rem = train_test_split(x, y, test_size=0.2, random_state=42)
     x_val, x_opt, y_val, y_opt = train_test_split(x_rem, y_rem, test_size=0.5, random_state=42)
-    # Convert to torch tensors
-    # x_train = torch.tensor(x_train, dtype=torch.float32)
-    # x_opt = torch.tensor(x_opt, dtype=torch.float32)
-    # x_val = torch.tensor(x_val, dtype=torch.float32)
-
-    # y_train = torch.tensor(y_train, dtype=torch.long)
-    # y_opt = torch.tensor(y_opt, dtype=torch.long)
-    # y_val = torch.tensor(y_val, dtype=torch.long)
 
     hparams = {'neuron_cnt1': neuron_cnt1, 'learning_rate': learning_rate}
     model = create_model(hparams, x[0][0].shape[1])
     optimze_acc = train_model(model, x_train, x_opt, y_train, y_opt, hparams, trial, True)
     return optimze_acc
 
-data = pd.read_csv(data_path)    
-study = optuna.create_study(pruner=optuna.pruners.HyperbandPruner(), direction='maximize')
-study.optimize(objective, n_trials=5)
+def main():
+    data = pd.read_csv(data_path)    
+    study = optuna.create_study(pruner=optuna.pruners.HyperbandPruner(), direction='maximize')
+    study.optimize(objective, n_trials=5)
 
-pickle.dump(study, open('protein_classification/lstm/study.pkl', 'wb+'))
+    pickle.dump(study, open('protein_classification/lstm/study.pkl', 'wb+'))

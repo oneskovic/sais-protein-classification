@@ -11,19 +11,24 @@ def onehot_encode_aa(x, codes_dict):
         onehot_x[i][codes_dict[letter]] = 1
     return onehot_x
 
-def generate_ngrams(n, current_str, i, res):
+def generate_ngrams_recursive(n, current_str, i, res):
     if i == n:
         res[''.join(x for x in current_str)] = len(res)
         return
     for c in ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']:
         current_str[i] = c
-        generate_ngrams(n, current_str, i+1, res)
+        generate_ngrams_recursive(n, current_str, i+1, res)
 
-def ngram_encode_aa(x, ngram_map):
+def generate_ngrams(ngram_len):
+    ngram_map = dict()
+    generate_ngrams_recursive(ngram_len, [None]*ngram_len, 0, ngram_map)
+    return ngram_map
+
+def ngram_encode_aa(x, ngram_size, ngram_map):
     x = x.upper()
     ngram_x = np.zeros(len(ngram_map))
-    for i in range(len(x)-2):
-        ngram_x[ngram_map[x[i:i+3]]] = 1
+    for i in range(len(x)-ngram_size+1):
+        ngram_x[ngram_map[x[i:i+ngram_size]]] = 1
     return ngram_x
 
 def onehot_encode_labels(labels, label_dict):
@@ -41,7 +46,6 @@ def zero_padd(x, max_len):
 
     return x_padded
 
-
 def make_dict(values):
     d = dict()
     for i, value in enumerate(values):
@@ -57,8 +61,7 @@ def preprocess(data):
     # encoded_seqs = zero_padd([onehot_encode_aa(seq, codes_dict) for seq in aa_seqs], max_len)
     # encoded_seqs = encoded_seqs.reshape(encoded_seqs.shape[0],encoded_seqs.shape[1]*encoded_seqs.shape[2])
     
-    ngram_map = dict()
-    generate_ngrams(3, [None]*3, 0, ngram_map)
+    ngram_map = generate_ngrams(3)
     encoded_seqs = np.array([ngram_encode_aa(seq, ngram_map) for seq in aa_seqs])
 
     if 'prot_Pfam' in data.columns:        

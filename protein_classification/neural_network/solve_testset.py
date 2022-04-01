@@ -18,7 +18,7 @@ best_model = pickle.load(open('best_model.pkl', 'rb'))
 y_pred = best_model(x)
 predicted_classes = np.argmax(y_pred.detach().numpy(), axis=1)
 
-from protein_classification.utils.preprocess import inv_label_dict
-class_names = [inv_label_dict[x] for x in predicted_classes]
+from protein_classification.utils.preprocess import inv_label_dict_small
+class_names = [inv_label_dict_small[x] for x in predicted_classes]
 data['prot_Pfam'] = class_names
 data.to_csv('data/test_no_labels_predicted.csv', index=False)

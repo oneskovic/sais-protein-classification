@@ -4,7 +4,7 @@ import numpy as np
 from torch import nn
 import torch
 from torchmetrics import Accuracy
-from protein_classification.utils.preprocess import preprocess_encode_ngram
+from utils.preprocess import preprocess_encode_ngram
 import optuna
 from sklearn.model_selection import train_test_split
 

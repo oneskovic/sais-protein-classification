@@ -7,12 +7,11 @@ from torchmetrics import Accuracy, F1Score, CohenKappa
 from protein_classification.utils.preprocess import preprocess_encode_ngram
 import optuna
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
+import sys
 
 data_path = 'data/klasifikacija-proteina-large.csv'
 class_cnt = 200
-
-def jedi_govna():
-    print('mmmm toplo sranje')
 
 def eval_model(x, y, model):
     # Define loss fn and metric
@@ -61,24 +60,25 @@ def train_model(model, x_train, x_test, y_train, y_test, hparams, trial = None, 
     # Train model
     for epoch in range(epoch_cnt):
         perm = torch.randperm(x_train.shape[0])
-        for i in range(0,x_train.shape[0],batch_size):
-            indices = perm[i:i+batch_size]
-            x_batch = x_train[indices]
-            y_batch = y_train[indices]
-            # Forward pass
-            outputs = model(x_batch)
-            loss = criterion(outputs, y_batch)
-            # Backward and optimize
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            with torch.no_grad():
-                #print(f'Train Loss: {loss}')
-                train_acc = metric(outputs, y_batch)
-                #print(f'Train Accuracy: {train_acc}')
-            if should_print:
-                percent_done = i / x_train.shape[0] / batch_size * 100
-                print(f'{percent_done:.2f}% Train accuracy: {train_acc:.2f}        ', end='\r')
+        with tqdm(total=x_train.shape[0], file=sys.stdout) as pbar:
+            for i in range(0,x_train.shape[0],batch_size):
+                indices = perm[i:i+batch_size]
+                x_batch = x_train[indices]
+                y_batch = y_train[indices]
+                # Forward pass
+                outputs = model(x_batch)
+                loss = criterion(outputs, y_batch)
+                # Backward and optimize
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                with torch.no_grad():
+                    #print(f'Train Loss: {loss}')
+                    train_acc = metric(outputs, y_batch)
+                    #print(f'Train Accuracy: {train_acc}')
+                if should_print:
+                    pbar.update(batch_size)
+                    pbar.set_description(f'Train accuracy: {train_acc:.2f}')
         # Test model
         with torch.no_grad():
             outputs = model(x_test)
@@ -90,7 +90,7 @@ def train_model(model, x_train, x_test, y_train, y_test, hparams, trial = None, 
                     raise optuna.TrialPruned()
             if should_print:
                 print(f'Test accuracy: {optimize_acc:.2f}       ', end='\n')
-                eval_metrics(outputs, y_test, should_print=True)
+               # eval_metrics(outputs, y_test, should_print=True)
         
     return optimize_acc
 

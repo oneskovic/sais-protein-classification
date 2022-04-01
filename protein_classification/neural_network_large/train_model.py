@@ -4,12 +4,15 @@ import numpy as np
 from torch import nn
 import torch
 from torchmetrics import Accuracy, F1Score, CohenKappa
-from utils.preprocess import preprocess_encode_ngram
+from protein_classification.utils.preprocess import preprocess_encode_ngram
 import optuna
 from sklearn.model_selection import train_test_split
 
 data_path = 'data/klasifikacija-proteina-large.csv'
 class_cnt = 200
+
+def jedi_govna():
+    print('mmmm toplo sranje')
 
 def eval_model(x, y, model):
     # Define loss fn and metric

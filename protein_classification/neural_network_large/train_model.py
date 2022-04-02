@@ -49,7 +49,7 @@ def eval_metrics(y_pred, y_true, should_print = False):
 
 def train_model(model, x_train, x_test, y_train, y_test, hparams, trial = None, should_print = False):
     learning_rate = hparams['learning_rate']
-    epoch_cnt = 4
+    epoch_cnt = 8
     batch_size = 100
     # Define loss function
     criterion = nn.CrossEntropyLoss()
@@ -138,12 +138,12 @@ def objective(trial):
 
 def main():
     study = optuna.create_study(pruner=optuna.pruners.HyperbandPruner(), direction='maximize')
-    study.optimize(objective, n_trials=50)
-
+    study.optimize(objective, n_trials=30)
+    x, y = preprocess_encode_ngram(data)
     model = create_model(study.best_params, x.shape[1])
     val_loss, val_acc = validate(study.best_params, model)
     print('Validation loss: ', val_loss)
     print('Validation accuracy: ', val_acc)
 
-    pickle.dump(model, open('best_model.pkl', 'wb+'))
-    pickle.dump(study, open('study.pkl', 'wb+'))
+    pickle.dump(model, open('protein_classification/neural_network_large/best_model.pkl', 'wb+'))
+    pickle.dump(study, open('protein_classification/neural_network_large/study.pkl', 'wb+'))
